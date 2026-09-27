@@ -1,0 +1,1330 @@
+/**
+ * ============================================================================
+ * CYBERROVER // MINIMAL SWISS ORANGE & OBSIDIAN DARK THEME
+ * Asymmetrical Full-Top Camera Viewport + Right-Aligned Header
+ * ============================================================================
+ */
+
+:root {
+  /* Color Palette */
+  --bg-deep: #08090C;
+  --bg-card: #0E1017;
+  --bg-input: #151821;
+  --bg-pill: #161922;
+
+  --accent-orange: #FF5500;
+  --accent-orange-hover: #FF6A00;
+  --accent-orange-dim: rgba(255, 85, 0, 0.12);
+  --accent-orange-border: rgba(255, 85, 0, 0.3);
+
+  --text-main: #FFFFFF;
+  --text-muted: #8E94A5;
+  --text-dim: #545A6D;
+
+  --color-safe: #00E676;
+  --color-safe-dim: rgba(0, 230, 118, 0.12);
+  --color-warn: #FFB300;
+  --color-danger: #FF334B;
+  --color-danger-dim: rgba(255, 51, 75, 0.15);
+
+  /* Fonts */
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Space Grotesk', 'JetBrains Mono', monospace;
+
+  /* Geometry & Radius */
+  --radius-card: 18px;
+  --radius-pill: 9999px;
+  --radius-sub: 12px;
+  --transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Base Reset & Complete Removal of Default Browser Cursor */
+*, *::before, *::after, html, body, button, input, select, textarea, a {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  cursor: none !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Custom Tactical Cyber Orange Text Selection (Replaces Ugly Default Blue) */
+::selection {
+  background-color: var(--accent-orange);
+  color: #000000;
+  text-shadow: none;
+}
+
+::-moz-selection {
+  background-color: var(--accent-orange);
+  color: #000000;
+  text-shadow: none;
+}
+
+body {
+  background-color: var(--bg-deep);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Allow text selection only inside editable IP input fields */
+input, textarea {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+/* ==========================================================================
+   1. SINGLE SLEEK BLACK-GREY CIRCLE CURSOR (Zero Lag, Direct 1:1)
+   ========================================================================== */
+
+.cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 14px;
+  height: 14px;
+  background-color: rgba(22, 25, 34, 0.92);
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition: width 0.15s ease, height 0.15s ease, border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease, border-radius 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.cursor-arrows {
+  display: none;
+  width: 18px;
+  height: 18px;
+  color: #000000;
+}
+
+.cursor-arrows svg {
+  width: 100%;
+  height: 100%;
+  stroke: #000000;
+}
+
+body.cursor-hover .cursor-dot {
+  width: 22px;
+  height: 22px;
+  background-color: rgba(255, 85, 0, 0.25);
+  border-color: var(--accent-orange);
+  box-shadow: 0 0 10px rgba(255, 85, 0, 0.5);
+}
+
+/* Custom Resize Cursor Theme: Matching Bidirectional Arrow Indicator */
+body.cursor-resizing-cols .cursor-dot {
+  width: 44px;
+  height: 22px;
+  border-radius: var(--radius-pill);
+  background-color: var(--accent-orange);
+  border-color: #FFFFFF;
+  box-shadow: 0 0 16px rgba(255, 85, 0, 0.7);
+}
+
+body.cursor-resizing-cols .cursor-dot .cursor-arrows {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ==========================================================================
+   2. MASTER DYNAMIC RESIZABLE COCKPIT
+   ========================================================================== */
+
+#cockpitGrid {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+  padding: 10px;
+  height: 100vh;
+  max-width: 100vw;
+  min-height: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  --left-col-percent: 50%;
+}
+
+.cockpit-left-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+  min-height: 0;
+  width: var(--left-col-percent, 50%);
+  min-width: 44%;
+  max-width: 56%;
+  flex-shrink: 0;
+}
+
+/* Draggable Inter-Column Resizer */
+.column-resizer {
+  width: 14px;
+  margin: 0 2px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 80;
+  user-select: none;
+  flex-shrink: 0;
+  transition: var(--transition);
+}
+
+.resizer-line {
+  width: 2px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, width 0.2s ease;
+}
+
+.resizer-handle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 44px;
+  background-color: #12151E;
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--radius-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7);
+  transition: var(--transition);
+  color: var(--text-dim);
+}
+
+.handle-arrow-icon {
+  width: 13px;
+  height: 13px;
+  stroke: currentColor;
+}
+
+.column-resizer:hover .resizer-line,
+body.is-dragging-splitter .resizer-line {
+  background: var(--accent-orange);
+  box-shadow: 0 0 10px rgba(255, 85, 0, 0.6);
+  width: 3px;
+}
+
+.column-resizer:hover .resizer-handle,
+body.is-dragging-splitter .resizer-handle {
+  background-color: var(--accent-orange);
+  border-color: #FFFFFF;
+  color: #000000;
+  box-shadow: 0 0 16px rgba(255, 85, 0, 0.6);
+  transform: translate(-50%, -50%) scale(1.12);
+}
+
+body.is-dragging-splitter {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+
+.cockpit-right-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+  min-height: 0;
+  flex: 1;
+  min-width: 44%;
+  max-width: 56%;
+  padding-left: 6px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Cards Base */
+.hud-card {
+  background-color: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: var(--radius-card);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  min-height: 0;
+  min-width: 0;
+  transition: var(--transition);
+}
+
+.card-header {
+  padding: 6px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  color: var(--text-main);
+}
+
+.svg-icon {
+  width: 14px;
+  height: 14px;
+  stroke: var(--accent-orange);
+}
+
+.mini-icon {
+  width: 11px;
+  height: 11px;
+  stroke: var(--text-dim);
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 3px;
+}
+
+/* ==========================================================================
+   3. RIGHT-SIDE SLIM HEADER (Cut in half from the left)
+   ========================================================================== */
+
+#cockpitHeader.right-header {
+  height: 38px;
+  padding: 3px 10px;
+  background-color: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: var(--radius-card);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  flex-shrink: 0;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.brand-title {
+  font-family: var(--font-sans);
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--text-main);
+  white-space: nowrap;
+}
+
+.pill-tag {
+  background-color: var(--accent-orange);
+  color: #000000;
+  font-family: var(--font-mono);
+  font-size: 7.5px;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: var(--radius-pill);
+  letter-spacing: 0.5px;
+}
+
+/* Network Settings Pill Bar (Compact & Responsive) */
+.network-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: var(--bg-deep);
+  padding: 2px 6px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.ip-input-group {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.ip-input-group label {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 800;
+  color: var(--text-dim);
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.ip-input-group input {
+  background-color: var(--bg-input);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: var(--radius-pill);
+  width: 95px;
+  max-width: 110px;
+  min-width: 65px;
+  outline: none;
+  transition: var(--transition);
+}
+
+.ip-input-group input:focus {
+  border-color: var(--accent-orange);
+  background-color: #1A1E29;
+  box-shadow: 0 0 8px rgba(255, 85, 0, 0.3);
+}
+
+/* Pill Buttons */
+.pill-btn {
+  font-family: var(--font-sans);
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 2.5px 8px;
+  border-radius: var(--radius-pill);
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  user-select: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.pill-btn.primary {
+  background-color: var(--accent-orange);
+  color: #000000;
+}
+
+.pill-btn.primary:hover {
+  background-color: #FFFFFF;
+  color: #000000;
+  box-shadow: 0 0 15px rgba(255, 85, 0, 0.4);
+}
+
+.pill-btn.secondary {
+  background-color: var(--bg-pill);
+  color: var(--text-main);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.pill-btn.secondary:hover {
+  background-color: var(--accent-orange);
+  color: #000000;
+  border-color: var(--accent-orange);
+  box-shadow: 0 0 12px rgba(255, 85, 0, 0.3);
+}
+
+/* Status Indicators */
+.pill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  background-color: var(--bg-deep);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-safe);
+}
+
+.pulse-dot.live {
+  background-color: var(--color-danger);
+  animation: pulse 1s infinite alternate;
+}
+
+.status-online {
+  color: var(--color-safe);
+  border-color: rgba(0, 230, 118, 0.3);
+}
+
+.status-connecting {
+  color: var(--color-warn);
+  border-color: rgba(255, 179, 0, 0.3);
+}
+
+.status-connecting .pulse-dot {
+  background-color: var(--color-warn);
+  animation: pulse 1s infinite alternate;
+}
+
+.status-offline {
+  color: var(--color-danger);
+  border-color: rgba(255, 51, 75, 0.3);
+}
+
+.status-offline .pulse-dot {
+  background-color: var(--color-danger);
+}
+
+.badge-safe {
+  color: var(--color-safe);
+  background-color: var(--color-safe-dim);
+  border-color: rgba(0, 230, 118, 0.2);
+}
+
+.badge-danger {
+  color: var(--color-danger);
+  background-color: var(--color-danger-dim);
+  border-color: rgba(255, 51, 75, 0.4);
+  animation: pulse 1s infinite alternate;
+}
+
+.clock-pill {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--accent-orange);
+  background-color: var(--bg-deep);
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--accent-orange-border);
+}
+
+@keyframes pulse {
+  from { opacity: 0.3; }
+  to { opacity: 1; }
+}
+
+/* ==========================================================================
+   4. TOP-LEFT: HUGE HD OPTICAL VIEWPORT (Starts from absolute Top)
+   ========================================================================== */
+
+.video-card {
+  flex: 1.75;
+  min-height: 0;
+}
+
+.stream-stats {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stat-pill {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  background-color: var(--bg-deep);
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.live-pill {
+  color: var(--color-danger);
+  border-color: rgba(255, 51, 75, 0.2);
+  background-color: var(--color-danger-dim);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.video-container {
+  flex: 1;
+  position: relative;
+  background-color: #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  min-height: 0;
+}
+
+#liveVideoFeed {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* Minimal HUD Crosshair Overlay */
+.hud-crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  width: 70px;
+  height: 70px;
+}
+
+.target-bracket {
+  width: 100%;
+  height: 100%;
+  border: 1px solid rgba(255, 85, 0, 0.25);
+  border-radius: 12px;
+}
+
+.center-point {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  background-color: var(--accent-orange);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 6px var(--accent-orange);
+}
+
+/* Floating Toolbar - Unified Single-Line Horizontal Dock */
+.video-toolbar {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: rgba(10, 12, 18, 0.88);
+  backdrop-filter: blur(16px);
+  padding: 4px 8px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  white-space: nowrap;
+  user-select: none;
+  z-index: 30;
+}
+
+.tool-pill {
+  background: transparent;
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 9px;
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0 8px;
+  height: 24px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  user-select: none;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.tool-pill span {
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.tool-pill kbd {
+  font-family: var(--font-mono);
+  font-size: 7.5px;
+  font-weight: 700;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+  padding: 1px 4px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  display: inline-block;
+  line-height: 1;
+  margin-left: 1px;
+}
+
+.tool-pill.icon-only {
+  padding: 0 6px;
+}
+
+.btn-icon {
+  width: 11px;
+  height: 11px;
+  stroke: currentColor;
+  flex-shrink: 0;
+}
+
+.tool-pill:hover {
+  background-color: var(--accent-orange);
+  color: #000000;
+  border-color: var(--accent-orange);
+  box-shadow: 0 0 10px rgba(255, 85, 0, 0.4);
+}
+
+.tool-pill:hover kbd {
+  background-color: rgba(0, 0, 0, 0.25);
+  color: #000000;
+  border-color: rgba(0, 0, 0, 0.35);
+}
+
+/* ==========================================================================
+   5. PART 2: MIDDLE - CAR SENSOR TELEMETRY CARD (Gas + Climate + Altimeter)
+   ========================================================================== */
+
+.car-sensor-card {
+  flex: 1.45;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.car-sensor-card .card-header-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.car-sensor-body {
+  padding: 10px 14px 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  min-height: 0;
+  justify-content: space-between;
+}
+
+/* 3-Channel Gas Sensor Matrix */
+.gas-matrix {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.gas-item {
+  background-color: var(--bg-deep);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-sub);
+  padding: 8px 12px;
+  transition: var(--transition);
+}
+
+.gas-item:hover {
+  border-color: var(--accent-orange-border);
+  box-shadow: 0 0 12px rgba(255, 85, 0, 0.2);
+}
+
+.gas-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.gas-name {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.gas-val {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: 0.5px;
+}
+
+.gauge-pill-track {
+  height: 6px;
+  background-color: #161822;
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  margin: 4px 0;
+}
+
+.gauge-pill-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-orange), #FF8800);
+  border-radius: var(--radius-pill);
+  transition: width 0.3s ease;
+}
+
+.gas-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--text-dim);
+}
+
+.threshold-label {
+  font-weight: 700;
+}
+
+.tag-status {
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  font-weight: 800;
+  font-size: 10px;
+}
+
+.tag-status.safe {
+  color: var(--color-safe);
+  background-color: var(--color-safe-dim);
+  border: 1px solid rgba(0, 230, 118, 0.2);
+}
+
+.tag-status.warn {
+  color: var(--color-warn);
+  background-color: rgba(255, 179, 0, 0.15);
+  border: 1px solid rgba(255, 179, 0, 0.3);
+}
+
+.tag-status.danger {
+  color: var(--color-danger);
+  background-color: var(--color-danger-dim);
+  border: 1px solid rgba(255, 51, 75, 0.4);
+  animation: pulse 1s infinite alternate;
+}
+
+/* Environmental Matrix (Climate & Altimeter Unified) */
+.env-matrix {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.env-box {
+  background-color: var(--bg-deep);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-sub);
+  padding: 8px 6px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: var(--transition);
+  min-height: 56px;
+}
+
+.env-box:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.08);
+}
+
+.env-box.highlight-orange {
+  border-color: rgba(255, 85, 0, 0.25);
+  background-color: rgba(255, 85, 0, 0.04);
+}
+
+.env-box.highlight-orange:hover {
+  border-color: var(--accent-orange);
+  box-shadow: 0 0 12px rgba(255, 85, 0, 0.25);
+}
+
+.env-box.highlight-green {
+  border-color: rgba(0, 230, 118, 0.25);
+  background-color: rgba(0, 230, 118, 0.04);
+}
+
+.env-box.highlight-green:hover {
+  border-color: var(--color-safe);
+  box-shadow: 0 0 12px rgba(0, 230, 118, 0.25);
+}
+
+.env-lbl {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-family: var(--font-sans);
+  font-size: 9.5px;
+  font-weight: 800;
+  color: var(--text-dim);
+  margin-bottom: 3px;
+  letter-spacing: 0.3px;
+}
+
+.env-val {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.env-val.orange-glow {
+  color: var(--accent-orange);
+  text-shadow: 0 0 10px rgba(255, 85, 0, 0.4);
+  font-size: 16px;
+}
+
+.env-val.green-glow {
+  color: var(--color-safe);
+  text-shadow: 0 0 10px rgba(0, 230, 118, 0.4);
+  font-size: 16px;
+}
+
+.alt-inline-group {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+}
+
+.env-subval {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-dim);
+}
+
+.alt-status-pill {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 800;
+  color: #00E676;
+  background-color: rgba(0, 230, 118, 0.12);
+  padding: 1px 5px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(0, 230, 118, 0.25);
+  margin-top: 2px;
+}
+
+/* ==========================================================================
+   6. BOTTOM-LEFT: REAL-TIME SENSOR OSCILLOSCOPE GRAPH
+   ========================================================================== */
+
+.graph-card {
+  flex: 1;
+  min-height: 0;
+}
+
+.graph-legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.legend-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background-color: var(--bg-deep);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+}
+
+.legend-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.legend-pill.ch4 .legend-dot { background-color: #FF5500; box-shadow: 0 0 6px #FF5500; }
+.legend-pill.co .legend-dot { background-color: #FF334B; box-shadow: 0 0 6px #FF334B; }
+.legend-pill.co2 .legend-dot { background-color: #FFB300; box-shadow: 0 0 6px #FFB300; }
+.legend-pill.gforce .legend-dot { background-color: #FFFFFF; box-shadow: 0 0 6px #FFFFFF; }
+.legend-pill.pitch .legend-dot { background-color: #00E5FF; box-shadow: 0 0 6px #00E5FF; }
+.legend-pill.roll .legend-dot { background-color: #00E676; box-shadow: 0 0 6px #00E676; }
+
+.graph-canvas-container {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  position: relative;
+  background-color: var(--bg-deep);
+}
+
+#telemetryCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ==========================================================================
+   7. PART 3: BOTTOM-RIGHT - PHONE DATA (3D Artificial Horizon & Sensors)
+   ========================================================================== */
+
+.phone-data-card {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.phone-data-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  min-height: 0;
+}
+
+.inclinometer-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 6px 14px;
+  flex: 1;
+}
+
+.incline-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-deep);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-sub);
+  padding: 8px 14px;
+  min-width: 105px;
+  transition: var(--transition);
+}
+
+.incline-metric:hover {
+  border-color: var(--accent-orange-border);
+  box-shadow: 0 0 12px rgba(255, 85, 0, 0.2);
+}
+
+.metric-title {
+  font-family: var(--font-sans);
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+}
+
+.metric-val {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--accent-orange);
+  text-shadow: 0 0 10px rgba(255, 85, 0, 0.35);
+  margin: 2px 0;
+}
+
+.metric-sub {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 700;
+  color: var(--text-dim);
+}
+
+.horizon-wrapper {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.zero-btn {
+  position: absolute;
+  bottom: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 8.5px;
+  font-weight: 800;
+  padding: 3px 9px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
+  white-space: nowrap;
+}
+
+.zero-btn:hover {
+  background-color: var(--accent-orange);
+  color: #000000;
+  box-shadow: 0 0 12px rgba(255, 85, 0, 0.4);
+}
+
+/* Phone Health Row */
+.phone-health-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 0 14px 4px 14px;
+  flex-shrink: 0;
+}
+
+.health-box {
+  background-color: var(--bg-deep);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-sub);
+  padding: 7px 4px;
+  text-align: center;
+  transition: var(--transition);
+}
+
+.health-box:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.08);
+}
+
+.health-box .lbl {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  font-family: var(--font-sans);
+  font-size: 8.5px;
+  font-weight: 800;
+  color: var(--text-dim);
+  margin-bottom: 2px;
+}
+
+.health-box .num {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+
+/* ============================================================================
+ * CYBERROVER X4.3 - LORA TELEMETRY, CAR BATTERY & SQLite DBMS STYLES
+ * ============================================================================ */
+
+.telemetry-addon-matrix {
+  display: grid;
+  grid-template-columns: 1.15fr 1.45fr 1fr;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.addon-box {
+  background-color: var(--bg-deep);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: var(--radius-sub);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 4px;
+  transition: var(--transition);
+}
+
+.addon-box:hover {
+  border-color: var(--accent-orange-border);
+  box-shadow: 0 4px 14px rgba(255, 85, 0, 0.08);
+}
+
+.addon-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.addon-lbl {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.addon-sublbl {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-dim);
+}
+
+.addon-body-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 2px 0;
+}
+
+.addon-val {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.coords-text {
+  font-size: 0.78rem;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.addon-tag {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 85, 0, 0.15);
+  color: var(--accent-orange);
+}
+
+.battery-fill {
+  background: linear-gradient(90deg, #FF334B 0%, #FFB300 35%, #00E676 100%) !important;
+}
+
+.addon-footer-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.addon-subtag {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--text-dim);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.db-badge {
+  background: rgba(0, 230, 118, 0.12);
+  color: var(--color-safe);
+  padding: 1px 6px;
+  border-radius: 4px;
+  cursor: pointer !important;
+  font-weight: 700;
+}
+
+.db-badge:hover {
+  background: rgba(0, 230, 118, 0.25);
+  color: #FFFFFF;
+}
+
+/* SQLite DBMS Modal Window */
+.dbms-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(8, 9, 12, 0.88);
+  backdrop-filter: blur(8px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.dbms-modal-card {
+  background: var(--bg-card);
+  border: 1px solid var(--accent-orange-border);
+  border-radius: var(--radius-card);
+  width: 95vw;
+  max-width: 1300px;
+  height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(255, 85, 0, 0.15);
+  overflow: hidden;
+}
+
+.dbms-modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 85, 0, 0.04);
+}
+
+.dbms-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dbms-title-group h3 {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  color: var(--text-main);
+  letter-spacing: 0.05em;
+}
+
+.dbms-title-group p {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.dbms-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.dbms-table-container {
+  flex: 1;
+  overflow: auto;
+  padding: 10px;
+}
+
+.dbms-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.dbms-table th {
+  background: #12151E;
+  color: var(--accent-orange);
+  text-align: left;
+  padding: 10px 8px;
+  border-bottom: 1px solid rgba(255, 85, 0, 0.3);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.dbms-table td {
+  padding: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--text-main);
+}
+
+.dbms-table tr:hover {
+  background: rgba(255, 85, 0, 0.06);
+}

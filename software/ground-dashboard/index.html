@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CYBERROVER // COMMAND COCKPIT</title>
+  
+  <!-- Premium Modern Typography: Plus Jakarta Sans & Space Grotesk -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="custom-cursor-active">
+
+  <!-- Single Sleek Black-Grey Circle Cursor (Direct 1:1, No Lag) -->
+  <div id="cursorDot" class="cursor-dot">
+    <div class="cursor-arrows">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="7 16 3 12 7 8"/>
+        <polyline points="17 8 21 12 17 16"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- MASTER ASYMMETRICAL 2-COLUMN COCKPIT (Zero Top Obstruction for Camera) -->
+  <main id="cockpitGrid">
+
+    <!-- ========================================================= -->
+    <!-- LEFT COLUMN: FULL-TOP HUGE OPTICAL FEED + OSCILLOSCOPE    -->
+    <!-- ========================================================= -->
+    <section class="cockpit-left-col">
+      
+      <!-- Top-Left: Live HD Optical Viewport (Starts at absolute Top y=0) -->
+      <div class="hud-card video-card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+            <span>OPTICAL RECONNAISSANCE</span>
+          </div>
+          <div class="stream-stats" id="streamStats">
+            <span class="stat-pill status-connecting"><span class="pulse-dot"></span> CONNECTING...</span>
+          </div>
+        </div>
+
+        <div class="video-container" id="videoWrapper">
+          <img id="liveVideoFeed" src="" alt="Awaiting Phone Video Stream..." onerror="handleVideoError(this)" onload="handleVideoSuccess()">
+          
+          <!-- Minimal HUD Crosshair Overlay -->
+          <div class="hud-crosshair">
+            <div class="target-bracket"></div>
+            <div class="center-point"></div>
+          </div>
+
+          <!-- Video Controls Floating Toolbar (Single Razor-Sharp Horizontal Line) -->
+          <div class="video-toolbar">
+            <button class="tool-pill hover-target" id="btnToggleTorch" onclick="togglePhoneTorch()" title="Shortcut: T">
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-7 7c0 2.5 1.5 4.5 3 6h8c1.5-1.5 3-3.5 3-6a7 7 0 0 0-7-7z"/>
+              </svg>
+              <span>TORCH</span>
+              <kbd>T</kbd>
+            </button>
+            <button class="tool-pill hover-target" id="btnAutoTorch" onclick="toggleAutoTorch()" title="Auto Torch in Dark (Shortcut: A)">
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="5"/>
+                <line x1="12" y1="1" x2="12" y2="3"/>
+                <line x1="12" y1="21" x2="12" y2="23"/>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                <line x1="1" y1="12" x2="3" y2="12"/>
+                <line x1="21" y1="12" x2="23" y2="12"/>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+              </svg>
+              <span>AUTO</span>
+              <kbd>A</kbd>
+            </button>
+            <button class="tool-pill hover-target" id="btnSwitchCam" onclick="switchCamera()" title="Shortcut: F">
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 16v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h4M22 2l-6 6M22 8V2h-6"/>
+              </svg>
+              <span>FLIP</span>
+              <kbd>F</kbd>
+            </button>
+            <button class="tool-pill hover-target" id="btnSnapshot" onclick="captureSnapshot()" title="Shortcut: S">
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+              <span>SNAPSHOT</span>
+              <kbd>S</kbd>
+            </button>
+            <button class="tool-pill hover-target icon-only" id="btnZoomIn" onclick="adjustZoom(1)" title="Zoom In (Shortcut: P)">
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                <line x1="11" y1="8" x2="11" y2="14"/>
+                <line x1="8" y1="11" x2="14" y2="11"/>
+              </svg>
+              <kbd>P</kbd>
+            </button>
+            <button class="tool-pill hover-target icon-only" id="btnZoomOut" onclick="adjustZoom(-1)" title="Zoom Out (Shortcut: M)">
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                <line x1="8" y1="11" x2="14" y2="11"/>
+              </svg>
+              <kbd>M</kbd>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom-Left: Real-Time Multi-Sensor Oscilloscope Graph -->
+      <div class="hud-card graph-card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+            <span>LIVE TELEMETRY OSCILLOSCOPE</span>
+          </div>
+          <div class="graph-legend">
+            <span class="legend-pill ch4"><span class="legend-dot"></span> CH₄</span>
+            <span class="legend-pill co"><span class="legend-dot"></span> CO</span>
+            <span class="legend-pill co2"><span class="legend-dot"></span> CO₂</span>
+            <span class="legend-pill gforce"><span class="legend-dot"></span> G-FORCE</span>
+            <span class="legend-pill pitch"><span class="legend-dot"></span> PITCH</span>
+            <span class="legend-pill roll"><span class="legend-dot"></span> ROLL</span>
+          </div>
+        </div>
+
+        <div class="graph-canvas-container">
+          <canvas id="telemetryCanvas"></canvas>
+        </div>
+      </div>
+
+    </section>
+
+     <!-- ========================================================= -->
+     <!-- DRAGGABLE INTER-COLUMN RESIZER (Custom Cyber Arrow Theme) -->
+     <!-- ========================================================= -->
+     <div id="colResizer" class="column-resizer hover-target" title="Drag to Resize Columns • Double-click to Reset Width">
+       <div class="resizer-line"></div>
+       <div class="resizer-handle">
+         <svg class="handle-arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+           <polyline points="7 16 3 12 7 8"/>
+           <polyline points="17 8 21 12 17 16"/>
+           <line x1="3" y1="12" x2="21" y2="12"/>
+         </svg>
+       </div>
+     </div>
+ 
+     <!-- ========================================================= -->
+     <!-- RIGHT COLUMN: 3-PART HIGH-VISIBILITY COCKPIT               -->
+     <!-- 1. Top Nav Header | 2. Car Sensor Data | 3. Phone Data    -->
+     <!-- ========================================================= -->
+     <section class="cockpit-right-col">
+
+      <!-- ========================================================= -->
+      <!-- PART 1: TOP NAV HEADER (Brand, IP Controls, Zoom, Clock)   -->
+      <!-- ========================================================= -->
+      <header id="cockpitHeader" class="right-header">
+        <div class="header-brand">
+          <span class="brand-title">CYBERROVER</span>
+          <span class="pill-tag">V4</span>
+        </div>
+
+        <div class="network-bar">
+          <div class="ip-input-group">
+            <label for="phoneIp">PHONE IP</label>
+            <input type="text" id="phoneIp" value="10.75.5.238:8080" placeholder="10.75.5.238:8080" spellcheck="false">
+          </div>
+          <div class="ip-input-group">
+            <label for="espIp">ESP32 HUB</label>
+            <input type="text" id="espIp" value="10.189.50.117" placeholder="10.189.50.117" spellcheck="false">
+          </div>
+          <button id="btnApplyIp" class="pill-btn primary hover-target" onclick="applyNetworkSettings()">LOCK</button>
+          <button id="btnLoraConnect" class="pill-btn secondary hover-target" onclick="connectWebSerial()" title="Direct USB-TTL Serial Link in Chrome">LORA USB</button>
+          <button id="btnDbmsModal" class="pill-btn highlight-orange hover-target" onclick="toggleDbmsModal()" title="View SQLite Mission Database & Export CSV">DBMS LOGS</button>
+        </div>
+
+        <div class="clock-pill" id="hudClock">00:00:00</div>
+      </header>
+
+      <!-- ========================================================= -->
+      <!-- PART 2: MIDDLE - CAR SENSOR DATA (Gas + Climate + Altimeter)-->
+      <!-- ========================================================= -->
+      <div class="hud-card car-sensor-card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+            <span>CAR SENSOR TELEMETRY</span>
+          </div>
+          <div class="card-header-badges">
+            <div id="bmpStatusBadge" class="pill-badge status-offline">BMP280 STANDBY</div>
+            <div id="gasWarningBadge" class="pill-badge status-offline">HUB OFFLINE</div>
+          </div>
+        </div>
+
+        <div class="car-sensor-body">
+          <!-- 3-Channel Gas Sensor Matrix -->
+          <div class="gas-matrix">
+            <!-- MQ-4 Methane Sensor -->
+            <div class="gas-item hover-target">
+              <div class="gas-meta">
+                <span class="gas-name">METHANE (CH₄)</span>
+                <span id="valMq4" class="gas-val">-- ADC</span>
+              </div>
+              <div class="gauge-pill-track">
+                <div id="barMq4" class="gauge-pill-fill" style="width: 0%;"></div>
+              </div>
+              <div class="gas-footer">
+                <span class="threshold-label">THRESHOLD: 700 ADC</span>
+                <span id="statusMq4" class="tag-status">OFFLINE</span>
+              </div>
+            </div>
+
+            <!-- MQ-7 Carbon Monoxide Sensor -->
+            <div class="gas-item hover-target">
+              <div class="gas-meta">
+                <span class="gas-name">CARBON MONOXIDE (CO)</span>
+                <span id="valMq7" class="gas-val">-- ADC</span>
+              </div>
+              <div class="gauge-pill-track">
+                <div id="barMq7" class="gauge-pill-fill" style="width: 0%;"></div>
+              </div>
+              <div class="gas-footer">
+                <span class="threshold-label">THRESHOLD: 850 ADC</span>
+                <span id="statusMq7" class="tag-status">OFFLINE</span>
+              </div>
+            </div>
+
+            <!-- MQ-135 Air Quality Sensor -->
+            <div class="gas-item hover-target">
+              <div class="gas-meta">
+                <span class="gas-name">AIR QUALITY (CO₂)</span>
+                <span id="valMq135" class="gas-val">-- ADC</span>
+              </div>
+              <div class="gauge-pill-track">
+                <div id="barMq135" class="gauge-pill-fill" style="width: 0%;"></div>
+              </div>
+              <div class="gas-footer">
+                <span class="threshold-label">THRESHOLD: 700 ADC</span>
+                <span id="statusMq135" class="tag-status">OFFLINE</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Environmental Climate & Altimeter Matrix (NO DUPLICATE PRESSURE!) -->
+          <div class="env-matrix">
+            <div class="env-box hover-target">
+              <span class="env-lbl">
+                <svg class="mini-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
+                TEMPERATURE
+              </span>
+              <span class="env-val" id="valTemp">-- °C</span>
+            </div>
+
+            <div class="env-box hover-target">
+              <span class="env-lbl">
+                <svg class="mini-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+                HUMIDITY
+              </span>
+              <span class="env-val" id="valHum">-- %</span>
+            </div>
+
+            <div class="env-box hover-target">
+              <span class="env-lbl">
+                <svg class="mini-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+                DEW POINT
+              </span>
+              <span class="env-val" id="valDew">-- °C</span>
+            </div>
+
+            <!-- ATMOSPHERIC PRESSURE: Shown cleanly once! -->
+            <div class="env-box highlight-orange hover-target">
+              <span class="env-lbl">
+                <svg class="mini-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                ATM PRESSURE
+              </span>
+              <span class="env-val orange-glow" id="valPressure">-- hPa</span>
+              <!-- Hidden companion so JS update doesn't error if valBaroPressure is referenced -->
+              <span id="valBaroPressure" style="display:none;"></span>
+            </div>
+
+            <!-- RELATIVE ALTITUDE & ELEVATION TREND -->
+            <div class="env-box highlight-green hover-target">
+              <span class="env-lbl">
+                <svg class="mini-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l7 19-7-4-7 4 7-19z"/></svg>
+                ALTITUDE
+              </span>
+              <div class="alt-inline-group">
+                <span class="env-val green-glow" id="valAltitude">-- m</span>
+                <span class="env-subval" id="valAltitudeFt">(-- ft)</span>
+              </div>
+              <div class="alt-status-pill" id="altTrendPill">BASE LEVEL</div>
+            </div>
+          </div>
+
+          <!-- Car Power, GPS Navigation & LoRa Radio Addon Matrix -->
+          <div class="telemetry-addon-matrix">
+            <!-- Car Battery Pack (3S Li-ion 9.6V - 12.6V) -->
+            <div class="addon-box battery-box-card hover-target">
+              <div class="addon-header">
+                <span class="addon-lbl">
+                  <svg class="mini-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="16" height="10" rx="2"/><line x1="20" y1="11" x2="22" y2="11" stroke-linecap="round"/></svg>
+                  CAR BATTERY (3S)
+                </span>
+                <span id="valCarBattCell" class="addon-sublbl">-- V/cell</span>
+              </div>
+              <div class="addon-body-row">
+                <span id="valCarBatt" class="addon-val orange-glow">-- V</span>
+                <span id="valCarBattPct" class="addon-tag">-- %</span>
+              </div>
+              <div class="gauge-pill-track">
+                <div id="barCarBatt" class="gauge-pill-fill battery-fill" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <!-- GPS Tactical Coordinates & Satellite Lock -->
+            <div class="addon-box gps-box-card hover-target">
+              <div class="addon-header">
+                <span class="addon-lbl">
+                  <svg class="mini-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+                  GPS NAVIGATION
+                </span>
+                <span id="badgeGpsFix" class="pill-badge status-offline">SEARCHING</span>
+              </div>
+              <div class="addon-body-row">
+                <span id="valGpsCoords" class="addon-val green-glow coords-text">ACQUIRING FIX...</span>
+              </div>
+              <div class="addon-footer-row">
+                <span id="valGpsSats" class="addon-subtag">-- SATS</span>
+                <span id="valGpsSpeed" class="addon-subtag">-- km/h</span>
+                <span id="valGpsAlt" class="addon-subtag">-- m ALT</span>
+              </div>
+            </div>
+
+            <!-- LoRa Transceiver Radio Link & SQLite DBMS Status -->
+            <div class="addon-box lora-box-card hover-target">
+              <div class="addon-header">
+                <span class="addon-lbl">
+                  <svg class="mini-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
+                  LORA RF LINK
+                </span>
+                <span id="badgeLoraStatus" class="pill-badge status-offline">STANDBY</span>
+              </div>
+              <div class="addon-body-row">
+                <span id="valLoraRssi" class="addon-val">-- dBm</span>
+                <span id="valLoraPkt" class="addon-tag">#0 PKT</span>
+              </div>
+              <div class="addon-footer-row">
+                <span id="valDbCount" class="addon-subtag db-badge" onclick="toggleDbmsModal()">DBMS: 0 RECS</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================================= -->
+      <!-- PART 3: BOTTOM - PHONE DATA (3D Inclinometer & Phone Health)-->
+      <!-- ========================================================= -->
+      <div class="hud-card phone-data-card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="2" y1="12" x2="22" y2="12"/>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+            <span>PHONE SENSORS & INCLINOMETER</span>
+          </div>
+          <div id="rolloverAlert" class="pill-badge status-connecting">PHONE STANDBY</div>
+        </div>
+
+        <div class="phone-data-body">
+          <div class="inclinometer-panel">
+            <!-- Left Metric: Pitch -->
+            <div class="incline-metric hover-target">
+              <span class="metric-title">CLIMB / DIVE</span>
+              <span class="metric-val" id="valPitch">--°</span>
+              <span class="metric-sub">PITCH ANGLE</span>
+            </div>
+
+            <!-- Center: 3D Artificial Horizon SVG Widget -->
+            <div class="horizon-wrapper">
+              <svg id="horizonSvg" viewBox="0 0 200 200">
+                <circle cx="100" cy="100" r="90" fill="#0C0E14" stroke="rgba(255, 85, 0, 0.3)" stroke-width="2"/>
+                <g id="horizonHorizonGroup">
+                  <path id="horizonGround" d="M 10 100 A 90 90 0 0 0 190 100 Z" fill="#FF5500" opacity="0.15"/>
+                  <line x1="15" y1="100" x2="185" y2="100" stroke="#FF5500" stroke-width="2.5"/>
+                  <line x1="75" y1="75" x2="125" y2="75" stroke="#FFFFFF" stroke-width="1.5" opacity="0.6"/>
+                  <line x1="85" y1="55" x2="115" y2="55" stroke="#FFFFFF" stroke-width="1.5" opacity="0.6"/>
+                  <line x1="75" y1="125" x2="125" y2="125" stroke="#FFFFFF" stroke-width="1.5" opacity="0.6"/>
+                  <line x1="85" y1="145" x2="115" y2="145" stroke="#FFFFFF" stroke-width="1.5" opacity="0.6"/>
+                </g>
+                <circle cx="100" cy="100" r="4" fill="#FF5500"/>
+                <path d="M 65 100 L 90 100 L 95 104 L 105 104 L 110 100 L 135 100" fill="none" stroke="#FFFFFF" stroke-width="2.5"/>
+              </svg>
+              <button class="pill-btn secondary zero-btn hover-target" onclick="zeroCalibrateOrientation()">ZERO CAL</button>
+            </div>
+
+            <!-- Right Metric: Roll -->
+            <div class="incline-metric hover-target">
+              <span class="metric-title">TILT / LEAN</span>
+              <span class="metric-val" id="valRoll">--°</span>
+              <span class="metric-sub">ROLL ANGLE</span>
+            </div>
+          </div>
+
+          <!-- Phone Health & Kinetic Metrics Row -->
+          <div class="phone-health-row">
+            <div class="health-box hover-target">
+              <span class="lbl">
+                <svg class="mini-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                G-FORCE
+              </span>
+              <span class="num" id="valGforce">-- G</span>
+            </div>
+            <div class="health-box hover-target">
+              <span class="lbl">
+                <svg class="mini-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                AMBIENT LIGHT
+              </span>
+              <span class="num" id="valLight">-- lx</span>
+            </div>
+            <div class="health-box hover-target">
+              <span class="lbl">
+                <svg class="mini-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="18" height="12" rx="2"/><line x1="23" y1="11" x2="23" y2="13"/></svg>
+                BATTERY
+              </span>
+              <span class="num" id="valPhoneBat">-- %</span>
+            </div>
+            <div class="health-box hover-target">
+              <span class="lbl">
+                <svg class="mini-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
+                PHONE TEMP
+              </span>
+              <span class="num" id="valPhoneTemp">-- °C</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  
+  <!-- ========================================================= -->
+  <!-- SQLITE DBMS MISSION TELEMETRY VIEWER & CSV EXPORT MODAL   -->
+  <!-- ========================================================= -->
+  <div id="dbmsModal" class="dbms-modal-backdrop" style="display: none;">
+    <div class="dbms-modal-card">
+      <div class="dbms-modal-header">
+        <div class="dbms-title-group">
+          <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <ellipse cx="12" cy="5" rx="9" ry="3"/>
+            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+          </svg>
+          <div>
+            <h3>CYBERROVER X4.3 // PERSISTENT SQLite MISSION DBMS</h3>
+            <p>Database: <code>mission_telemetry.db</code> • High-resolution timestamped telemetry records</p>
+          </div>
+        </div>
+        <div class="dbms-actions">
+          <button class="pill-btn primary hover-target" onclick="exportMissionCsv()">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            EXPORT CSV REPORT
+          </button>
+          <button class="pill-btn secondary hover-target" onclick="refreshDbmsTable()">REFRESH</button>
+          <button class="pill-btn hover-target" onclick="toggleDbmsModal()">CLOSE [X]</button>
+        </div>
+      </div>
+      <div class="dbms-table-container">
+        <table class="dbms-table">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Pkt</th>
+              <th>Battery</th>
+              <th>CH4 (ADC)</th>
+              <th>CO (ADC)</th>
+              <th>AQI (ADC)</th>
+              <th>Temp</th>
+              <th>Humidity</th>
+              <th>Pressure</th>
+              <th>Altitude</th>
+              <th>GPS Fix</th>
+              <th>Latitude</th>
+              <th>Longitude</th>
+              <th>Sats</th>
+              <th>RSSI</th>
+            </tr>
+          </thead>
+          <tbody id="dbmsTableBody">
+            <tr><td colspan="15" style="text-align:center; padding:20px; color:#8E94A5;">No records logged yet. Power on Rover Layer 2 Environmental Node.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

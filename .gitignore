@@ -1,0 +1,19 @@
+# Compiled binaries
+*.hex
+*.elf
+*.bin
+build/
+*.o
+*.a
+
+# Editor and OS files
+.vscode/
+.idea/
+*.swp
+*.bak
+.DS_Store
+Thumbs.db
+
+# Arduino temporary files
+*.pyc
+__pycache__/
