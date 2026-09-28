@@ -1354,13 +1354,15 @@ function initPipMap() {
     pipMapInstance = L.map('pipMap', {
       center: currentRoverPos,
       zoom: 16,
+      minZoom: 7,
+      maxZoom: 18,
       zoomControl: false,
       attributionControl: false
     });
 
     // 2. Add Offline Raster Tile Layer (local /tiles/{z}/{x}/{y}.png)
     L.tileLayer('/tiles/{z}/{x}/{y}.png', {
-      minZoom: 9,
+      minZoom: 7,
       maxZoom: 18,
       className: 'tactical-map-tiles'
     }).addTo(pipMapInstance);
@@ -1413,26 +1415,22 @@ async function loadJharkhandVectorBoundary() {
     if (res.ok) {
       const data = await res.json();
       if (data && data.elements) {
-        const latlngs = [];
+        // Draw each boundary segment separately to prevent cross-state diagonal lines
         data.elements.forEach(el => {
           if (el.members) {
             el.members.forEach(m => {
-              if (m.geometry) {
-                m.geometry.forEach(pt => {
-                  latlngs.push([pt.lat, pt.lon]);
-                });
+              if (m.geometry && m.geometry.length > 1) {
+                const seg = m.geometry.map(pt => [pt.lat, pt.lon]);
+                L.polyline(seg, {
+                  color: '#00E5FF',
+                  weight: 1.5,
+                  opacity: 0.75,
+                  dashArray: '5, 5'
+                }).addTo(pipMapInstance);
               }
             });
           }
         });
-        if (latlngs.length > 0) {
-          L.polyline(latlngs, {
-            color: '#00E5FF',
-            weight: 1.5,
-            opacity: 0.45,
-            dashArray: '8, 8'
-          }).addTo(pipMapInstance);
-        }
       }
     }
   } catch (e) {

@@ -69,20 +69,25 @@ def main():
 
     all_tiles = set()
 
-    # 1. Regional Overview (Ranchi, Ramgarh, Bokaro, Dhanbad corridor)
-    print("[1/4] Calculating regional corridor (Zoom 9-12)...")
-    all_tiles |= get_tiles_for_bbox(23.25, 23.92, 85.20, 86.55, 9, 12)
+    # 1. ENTIRE STATE OF JHARKHAND (All 24 Districts, Complete State Outline)
+    # Covers: Lat 21.90 to 25.40, Lon 83.25 to 88.00 at Zoom 7 to 12
+    print("[1/5] Calculating Whole State of Jharkhand overview (Zoom 7-12)...")
+    all_tiles |= get_tiles_for_bbox(21.90, 25.40, 83.25, 88.00, 7, 12)
 
-    # 2. Ramgarh Exhibition City & Venue
-    print("[2/4] Calculating Ramgarh Exhibition City (Zoom 13-16)...")
-    all_tiles |= get_tiles_for_bbox(23.59, 23.67, 85.47, 85.56, 13, 16)
+    # 2. Regional Urban Corridors (Ranchi, Ramgarh, Bokaro, Dhanbad)
+    print("[2/5] Calculating Regional Urban Corridor (Zoom 13)...")
+    all_tiles |= get_tiles_for_bbox(23.20, 23.95, 85.15, 86.60, 13, 13)
 
-    # 3. Local Campus & CSV Route: Saraswati Shishu Mandir & Chandrapura
-    print("[3/4] Calculating Local Campus & CSV Area (Zoom 13-17)...")
-    all_tiles |= get_tiles_for_bbox(23.775, 23.805, 86.265, 86.305, 13, 17)
+    # 3. Ramgarh Exhibition City & Venue
+    print("[3/5] Calculating Ramgarh Exhibition City (Zoom 14-16)...")
+    all_tiles |= get_tiles_for_bbox(23.58, 23.68, 85.46, 85.58, 14, 16)
 
-    # 4. Immediate Campus Yard at Ultra-High Detail (Zoom 18)
-    print("[4/4] Calculating Campus Grounds at Zoom 18...")
+    # 4. Dhanbad, Katras, Malkera, Chandrapura & CSV Track (Zoom 14-17)
+    print("[4/5] Calculating Dhanbad-Katras-Malkera Corridor (Zoom 14-17)...")
+    all_tiles |= get_tiles_for_bbox(23.74, 23.83, 86.24, 86.42, 14, 17)
+
+    # 5. Saraswati Shishu Mandir Immediate Campus Grounds (Zoom 18)
+    print("[5/5] Calculating Immediate Campus Grounds at Zoom 18...")
     all_tiles |= get_tiles_for_bbox(23.784, 23.791, 86.278, 86.285, 18, 18)
 
     total = len(all_tiles)
