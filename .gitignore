@@ -17,3 +17,7 @@ Thumbs.db
 # Arduino temporary files
 *.pyc
 __pycache__/
+
+# Map raster tiles cache
+software/ground-dashboard/tiles/
+

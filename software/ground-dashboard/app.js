@@ -1367,17 +1367,7 @@ function initPipMap() {
       className: 'tactical-map-tiles'
     }).addTo(pipMapInstance);
 
-    // 3. Add Base Station Marker (Saraswati Shishu Mandir)
-    baseStationMarker = L.circleMarker(BASE_CAMPUS_POS, {
-      radius: 7,
-      fillColor: '#00E5FF',
-      color: '#FFFFFF',
-      weight: 2,
-      fillOpacity: 0.95
-    }).addTo(pipMapInstance);
-    baseStationMarker.bindPopup('<b style="color:#000;">BASE STATION</b><br>Saraswati Shishu Mandir<br>23.78741°N, 86.28111°E');
-
-    // 4. Add Rover Position Marker (Glowing Orange Dot)
+    // 3. Add Rover Position Marker (Glowing Orange Dot)
     roverGpsMarker = L.circleMarker(currentRoverPos, {
       radius: 8,
       fillColor: '#FF5500',
@@ -1387,8 +1377,8 @@ function initPipMap() {
     }).addTo(pipMapInstance);
     roverGpsMarker.bindPopup('<b style="color:#000;">CYBERROVER X4.3</b><br>GPS Mission Location<br>23.79395°N, 86.29570°E');
 
-    // 5. Add Breadcrumb Polyline Trail
-    roverGpsTrail = L.polyline([BASE_CAMPUS_POS, currentRoverPos], {
+    // 4. Add Breadcrumb Polyline Trail (recording rover movement only)
+    roverGpsTrail = L.polyline([], {
       color: '#FF5500',
       weight: 3,
       opacity: 0.85,
