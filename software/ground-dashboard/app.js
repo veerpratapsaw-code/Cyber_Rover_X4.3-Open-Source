@@ -1348,11 +1348,11 @@ function initPipMap() {
   if (!mapEl || typeof L === 'undefined') return;
 
   try {
-    // 1. Initialize Leaflet Map centered between Campus and Last CSV fix
+    // 1. Initialize Leaflet Map centered on Rover
     pipMapInstance = L.map('pipMap', {
       center: currentRoverPos,
       zoom: 16,
-      minZoom: 7,
+      minZoom: 0,
       maxZoom: 18,
       zoomControl: false,
       attributionControl: false
@@ -1360,7 +1360,7 @@ function initPipMap() {
 
     // 2. Add Offline Raster Tile Layer (local /tiles/{z}/{x}/{y}.png)
     L.tileLayer('/tiles/{z}/{x}/{y}.png', {
-      minZoom: 7,
+      minZoom: 0,
       maxZoom: 18,
       className: 'tactical-map-tiles'
     }).addTo(pipMapInstance);
