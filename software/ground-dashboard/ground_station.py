@@ -379,14 +379,38 @@ def connect_port():
         return jsonify({"status": "switching", "target_port": chosen})
     return jsonify({"error": "No port provided"}), 400
 
+@app.route("/api/db/dates")
+def get_db_dates():
+    try:
+        conn = sqlite3.connect(DB_FILENAME)
+        cur = conn.cursor()
+        cur.execute("SELECT DISTINCT substr(timestamp, 1, 10) FROM mission_telemetry ORDER BY 1 DESC")
+        dates = [r[0] for r in cur.fetchall() if r[0]]
+        cur.execute("SELECT COUNT(*) FROM mission_telemetry")
+        total = cur.fetchone()[0]
+        conn.close()
+        return jsonify({"dates": dates, "total": total})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route("/api/db/recent")
 def get_recent_db():
-    limit = request.args.get("limit", 50, type=int)
+    limit = request.args.get("limit", 100, type=int)
+    date_filter = request.args.get("date", "all")
     try:
         conn = sqlite3.connect(DB_FILENAME)
         conn.row_factory = sqlite3.Row
         cur = conn.cursor()
-        cur.execute("SELECT * FROM mission_telemetry ORDER BY id DESC LIMIT ?", (limit,))
+        if date_filter and date_filter != "all":
+            if limit and limit > 0:
+                cur.execute("SELECT * FROM mission_telemetry WHERE timestamp LIKE ? ORDER BY id DESC LIMIT ?", (f"{date_filter}%", limit))
+            else:
+                cur.execute("SELECT * FROM mission_telemetry WHERE timestamp LIKE ? ORDER BY id DESC", (f"{date_filter}%",))
+        else:
+            if limit and limit > 0:
+                cur.execute("SELECT * FROM mission_telemetry ORDER BY id DESC LIMIT ?", (limit,))
+            else:
+                cur.execute("SELECT * FROM mission_telemetry ORDER BY id DESC")
         rows = [dict(r) for r in cur.fetchall()]
         conn.close()
         return jsonify(rows)
@@ -399,9 +423,13 @@ def export_csv():
         import io
         import csv
 
+        date_filter = request.args.get("date", "all")
         conn = sqlite3.connect(DB_FILENAME)
         cur = conn.cursor()
-        cur.execute("SELECT * FROM mission_telemetry ORDER BY id ASC")
+        if date_filter and date_filter != "all":
+            cur.execute("SELECT * FROM mission_telemetry WHERE timestamp LIKE ? ORDER BY id ASC", (f"{date_filter}%",))
+        else:
+            cur.execute("SELECT * FROM mission_telemetry ORDER BY id ASC")
         rows = cur.fetchall()
         col_names = [desc[0] for desc in cur.description]
         conn.close()
@@ -410,6 +438,7 @@ def export_csv():
         cw = csv.writer(si)
         cw.writerow(["# CYBERROVER X4.3 - OFFICIAL TELEMETRY MISSION LOG"])
         cw.writerow([f"# Exported on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"])
+        cw.writerow([f"# Date Filter: {date_filter}"])
         cw.writerow([f"# Total Mission Records: {len(rows)}"])
         cw.writerow([])
         cw.writerow(col_names)
@@ -417,7 +446,8 @@ def export_csv():
 
         output = make_response(si.getvalue())
         now_ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-        output.headers["Content-Disposition"] = f"attachment; filename=cyberrover_mission_{now_ts}.csv"
+        prefix = f"cyberrover_mission_{date_filter}_{now_ts}" if date_filter != "all" else f"cyberrover_mission_{now_ts}"
+        output.headers["Content-Disposition"] = f"attachment; filename={prefix}.csv"
         output.headers["Content-type"] = "text/csv"
         return output
     except Exception as e:

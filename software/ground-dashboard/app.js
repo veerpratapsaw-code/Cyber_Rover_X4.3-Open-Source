@@ -1202,9 +1202,50 @@ function toggleDbmsModal() {
   if (!modal) return;
   if (modal.style.display === 'none' || modal.style.display === '') {
     modal.style.display = 'flex';
+    document.body.classList.add('modal-open');
+    loadDbmsDates();
     refreshDbmsTable();
   } else {
     modal.style.display = 'none';
+    document.body.classList.remove('modal-open');
+  }
+}
+
+// Close modal on Escape key
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const modal = document.getElementById('dbmsModal');
+    if (modal && modal.style.display !== 'none' && modal.style.display !== '') {
+      toggleDbmsModal();
+    }
+  }
+});
+
+async function loadDbmsDates() {
+  const dateSelect = document.getElementById('dbmsDateFilter');
+  if (!dateSelect) return;
+  try {
+    const res = await fetch('http://localhost:5000/api/db/dates');
+    if (res.ok) {
+      const data = await res.json();
+      const currentVal = dateSelect.value;
+      let opts = '<option value="all">All Dates</option>';
+      if (data.dates && data.dates.length > 0) {
+        data.dates.forEach(d => {
+          opts += `<option value="${d}">${d}</option>`;
+        });
+      }
+      dateSelect.innerHTML = opts;
+      if (currentVal && Array.from(dateSelect.options).some(o => o.value === currentVal)) {
+        dateSelect.value = currentVal;
+      }
+      const countBadge = document.getElementById('dbmsRecordCount');
+      if (countBadge && data.total !== undefined) {
+        countBadge.innerText = `${data.total} Total Records`;
+      }
+    }
+  } catch (e) {
+    console.warn("Failed to load DBMS dates:", e);
   }
 }
 
@@ -1212,55 +1253,67 @@ async function refreshDbmsTable() {
   const tbody = document.getElementById('dbmsTableBody');
   if (!tbody) return;
 
+  const dateFilter = document.getElementById('dbmsDateFilter')?.value || 'all';
+  const limitFilter = document.getElementById('dbmsLimitFilter')?.value || '100';
+
   try {
-    const res = await fetch('http://localhost:5000/api/db/recent?limit=50');
+    const url = `http://localhost:5000/api/db/recent?date=${encodeURIComponent(dateFilter)}&limit=${encodeURIComponent(limitFilter)}`;
+    const res = await fetch(url);
     if (res.ok) {
       const rows = await res.json();
+      const countBadge = document.getElementById('dbmsRecordCount');
+      if (countBadge && rows) {
+        countBadge.innerText = `Showing ${rows.length} records`;
+      }
       if (rows && rows.length > 0) {
         tbody.innerHTML = rows.map(r => `
           <tr>
             <td>${r.timestamp}</td>
             <td>#${r.packet_id}</td>
-            <td style="color:#FFB300;">${r.battery_voltage.toFixed(1)}V (${r.battery_percent}%)</td>
+            <td style="color:#FFB300;">${Number(r.battery_voltage || 0).toFixed(1)}V (${r.battery_percent || 0}%)</td>
             <td>${r.mq4_raw}</td>
             <td>${r.mq7_raw}</td>
             <td>${r.mq135_raw}</td>
-            <td>${r.temp_c.toFixed(1)}°C</td>
-            <td>${r.humidity.toFixed(0)}%</td>
-            <td>${r.pressure_hpa.toFixed(1)} hPa</td>
-            <td>${r.altitude_m.toFixed(1)} m</td>
+            <td>${Number(r.temp_c || 0).toFixed(1)}°C</td>
+            <td>${Number(r.humidity || 0).toFixed(0)}%</td>
+            <td>${Number(r.pressure_hpa || 0).toFixed(1)} hPa</td>
+            <td>${Number(r.altitude_m || 0).toFixed(1)} m</td>
             <td><span class="pill-badge ${r.gps_fix ? 'status-live' : 'status-offline'}">${r.gps_fix ? 'FIX' : 'SEARCH'}</span></td>
-            <td>${r.latitude.toFixed(5)}</td>
-            <td>${r.longitude.toFixed(5)}</td>
-            <td>${r.satellites}</td>
-            <td>${r.rssi} dBm</td>
+            <td>${Number(r.latitude || 0).toFixed(5)}</td>
+            <td>${Number(r.longitude || 0).toFixed(5)}</td>
+            <td>${r.satellites || 0}</td>
+            <td>${r.rssi || -99} dBm</td>
           </tr>
         `).join('');
+        return;
+      } else {
+        tbody.innerHTML = '<tr><td colspan="15" style="text-align:center; padding:20px; color:#8E94A5;">No records found for the selected date filter.</td></tr>';
         return;
       }
     }
   } catch (e) {
-    // In-memory fallback
+    console.warn("DB fetch failed:", e);
   }
 
+  // Fallback to in-memory live log if backend is unreachable
   if (liveTelemetryLog.length > 0) {
     tbody.innerHTML = liveTelemetryLog.slice(0, 50).map(r => `
       <tr>
         <td>${r.timestamp}</td>
         <td>#${r.packet_count}</td>
-        <td style="color:#FFB300;">${r.battery_voltage.toFixed(1)}V (${r.battery_percent}%)</td>
+        <td style="color:#FFB300;">${Number(r.battery_voltage || 0).toFixed(1)}V (${r.battery_percent || 0}%)</td>
         <td>${r.mq4}</td>
         <td>${r.mq7}</td>
         <td>${r.mq135}</td>
-        <td>${r.temp_c.toFixed(1)}°C</td>
-        <td>${r.humidity.toFixed(0)}%</td>
-        <td>${r.pressure_hpa.toFixed(1)} hPa</td>
-        <td>${r.altitude_m.toFixed(1)} m</td>
+        <td>${Number(r.temp_c || 0).toFixed(1)}°C</td>
+        <td>${Number(r.humidity || 0).toFixed(0)}%</td>
+        <td>${Number(r.pressure_hpa || 0).toFixed(1)} hPa</td>
+        <td>${Number(r.altitude_m || 0).toFixed(1)} m</td>
         <td><span class="pill-badge ${r.gps_fix ? 'status-live' : 'status-offline'}">${r.gps_fix ? 'FIX' : 'SEARCH'}</span></td>
-        <td>${r.latitude.toFixed(5)}</td>
-        <td>${r.longitude.toFixed(5)}</td>
-        <td>${r.satellites}</td>
-        <td>${r.rssi} dBm</td>
+        <td>${Number(r.latitude || 0).toFixed(5)}</td>
+        <td>${Number(r.longitude || 0).toFixed(5)}</td>
+        <td>${r.satellites || 0}</td>
+        <td>${r.rssi || -99} dBm</td>
       </tr>
     `).join('');
   } else {
@@ -1269,5 +1322,6 @@ async function refreshDbmsTable() {
 }
 
 function exportMissionCsv() {
-  window.open('http://localhost:5000/api/db/export', '_blank');
+  const dateFilter = document.getElementById('dbmsDateFilter')?.value || 'all';
+  window.open(`http://localhost:5000/api/db/export?date=${encodeURIComponent(dateFilter)}`, '_blank');
 }
