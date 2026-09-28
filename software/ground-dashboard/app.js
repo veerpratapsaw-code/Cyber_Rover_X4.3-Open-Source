@@ -70,6 +70,9 @@ window.addEventListener('DOMContentLoaded', () => {
   // Initialize Real-time Dynamic 6-Channel Oscilloscope
   initTelemetryGraph();
 
+  // Initialize Tactical Picture-in-Picture (PiP) GPS Map (Red Box)
+  initPipMap();
+
   // Start HUD Clock
   startHudClock();
 
@@ -671,6 +674,7 @@ function updateGasUI(data) {
     if (valSats) valSats.innerText = `${data.satellites || 0} SATS`;
     if (valSpd) valSpd.innerText = `${(data.speed_kmh || 0.0).toFixed(1)} km/h`;
     if (valGpsAlt) valGpsAlt.innerText = `${(data.gps_altitude || data.altitude_m || 0.0).toFixed(1)} m ALT`;
+    updatePipMap(data.latitude, data.longitude, data.satellites || 0, true);
   } else {
     if (badgeGps) { badgeGps.className = 'pill-badge status-connecting'; badgeGps.innerText = 'SEARCHING'; }
     if (valCoords) valCoords.innerText = 'ACQUIRING SATELLITES';
@@ -1192,6 +1196,10 @@ function parseRawSerialLine(raw) {
 
     liveTelemetry.espConnected = true;
     updateGasUI(record);
+
+    if (fix && lat && lon) {
+      updatePipMap(lat, lon, sats, true);
+    }
   } catch (ex) {
     console.warn("Serial parse error:", ex);
   }
@@ -1324,4 +1332,155 @@ async function refreshDbmsTable() {
 function exportMissionCsv() {
   const dateFilter = document.getElementById('dbmsDateFilter')?.value || 'all';
   window.open(`http://localhost:5000/api/db/export?date=${encodeURIComponent(dateFilter)}`, '_blank');
+}
+
+// ============================================================================
+// 12. TACTICAL PICTURE-IN-PICTURE (PiP) GPS MAP (Leaflet Engine)
+// ============================================================================
+
+let pipMapInstance = null;
+let roverGpsMarker = null;
+let baseStationMarker = null;
+let roverGpsTrail = null;
+let currentRoverPos = [23.793950, 86.295700]; // Last known GPS location from CSV
+const BASE_CAMPUS_POS = [23.787411, 86.281111]; // Saraswati Shishu Mandir / Chandrapura
+
+function initPipMap() {
+  const mapEl = document.getElementById('pipMap');
+  if (!mapEl || typeof L === 'undefined') return;
+
+  try {
+    // 1. Initialize Leaflet Map centered between Campus and Last CSV fix
+    pipMapInstance = L.map('pipMap', {
+      center: currentRoverPos,
+      zoom: 16,
+      zoomControl: false,
+      attributionControl: false
+    });
+
+    // 2. Add Offline Raster Tile Layer (local /tiles/{z}/{x}/{y}.png)
+    L.tileLayer('/tiles/{z}/{x}/{y}.png', {
+      minZoom: 9,
+      maxZoom: 18,
+      className: 'tactical-map-tiles'
+    }).addTo(pipMapInstance);
+
+    // 3. Add Base Station Marker (Saraswati Shishu Mandir)
+    baseStationMarker = L.circleMarker(BASE_CAMPUS_POS, {
+      radius: 7,
+      fillColor: '#00E5FF',
+      color: '#FFFFFF',
+      weight: 2,
+      fillOpacity: 0.95
+    }).addTo(pipMapInstance);
+    baseStationMarker.bindPopup('<b style="color:#000;">BASE STATION</b><br>Saraswati Shishu Mandir<br>23.78741°N, 86.28111°E');
+
+    // 4. Add Rover Position Marker (Glowing Orange Dot)
+    roverGpsMarker = L.circleMarker(currentRoverPos, {
+      radius: 8,
+      fillColor: '#FF5500',
+      color: '#FFFFFF',
+      weight: 2.5,
+      fillOpacity: 1
+    }).addTo(pipMapInstance);
+    roverGpsMarker.bindPopup('<b style="color:#000;">CYBERROVER X4.3</b><br>GPS Mission Location<br>23.79395°N, 86.29570°E');
+
+    // 5. Add Breadcrumb Polyline Trail
+    roverGpsTrail = L.polyline([BASE_CAMPUS_POS, currentRoverPos], {
+      color: '#FF5500',
+      weight: 3,
+      opacity: 0.85,
+      dashArray: '5, 5'
+    }).addTo(pipMapInstance);
+
+    // 6. Asynchronously Load Jharkhand Vector Boundary
+    loadJharkhandVectorBoundary();
+
+    // 7. Ensure correct rendering size
+    setTimeout(() => {
+      if (pipMapInstance) pipMapInstance.invalidateSize();
+    }, 400);
+
+  } catch (err) {
+    console.warn("PiP Map init warning:", err);
+  }
+}
+
+async function loadJharkhandVectorBoundary() {
+  if (!pipMapInstance) return;
+  try {
+    const res = await fetch('/maps/jharkhand_boundary.json');
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.elements) {
+        const latlngs = [];
+        data.elements.forEach(el => {
+          if (el.members) {
+            el.members.forEach(m => {
+              if (m.geometry) {
+                m.geometry.forEach(pt => {
+                  latlngs.push([pt.lat, pt.lon]);
+                });
+              }
+            });
+          }
+        });
+        if (latlngs.length > 0) {
+          L.polyline(latlngs, {
+            color: '#00E5FF',
+            weight: 1.5,
+            opacity: 0.45,
+            dashArray: '8, 8'
+          }).addTo(pipMapInstance);
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("Jharkhand boundary load notice:", e);
+  }
+}
+
+function updatePipMap(lat, lon, sats, hasFix) {
+  if (!pipMapInstance || !lat || !lon) return;
+
+  currentRoverPos = [lat, lon];
+
+  if (roverGpsMarker) {
+    roverGpsMarker.setLatLng(currentRoverPos);
+  }
+  if (roverGpsTrail) {
+    roverGpsTrail.addLatLng(currentRoverPos);
+  }
+
+  const coordText = document.getElementById('pipCoordText');
+  if (coordText) {
+    coordText.innerText = `${lat.toFixed(5)}°N, ${lon.toFixed(5)}°E (${sats || 0} SATS)`;
+  }
+
+  pipMapInstance.panTo(currentRoverPos, { animate: true, duration: 0.5 });
+}
+
+function centerRoverLocation() {
+  if (pipMapInstance && currentRoverPos) {
+    pipMapInstance.setView(currentRoverPos, 16, { animate: true });
+  }
+}
+
+function toggleMapExpand() {
+  const container = document.getElementById('pipMapContainer');
+  const btn = document.getElementById('btnPipExpand');
+  if (!container) return;
+
+  const isExp = container.classList.toggle('expanded');
+  if (btn) {
+    btn.innerText = isExp ? '✖' : '◰';
+    btn.title = isExp ? 'Restore Mini Map' : 'Maximize Map';
+  }
+
+  setTimeout(() => {
+    if (pipMapInstance) {
+      pipMapInstance.invalidateSize();
+      if (currentRoverPos) pipMapInstance.panTo(currentRoverPos);
+    }
+  }, 320);
 }
