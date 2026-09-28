@@ -28,9 +28,9 @@ const THEATERS = [
   }
 ];
 
-import fieldImg1 from '../../assets/real_rover_field_1.png';
-import fieldImg2 from '../../assets/real_rover_field_2.png';
-import fieldImg3 from '../../assets/real_rover_field_3.png';
+import fieldImg1 from '../../assets/cyberrover_x43_hero.png';
+import fieldImg2 from '../../assets/cyberrover_x43_side.jpg';
+import fieldImg3 from '../../assets/cyberrover_x43_rear_gas.jpg';
 
 export default function OperationsSection() {
   return (
@@ -151,9 +151,9 @@ export default function OperationsSection() {
             gap: '16px'
           }}>
             {[
-              { img: fieldImg1, caption: 'TUNNEL APPROACH // 4WD TRACTION RUN', sub: 'Concrete slab traverse with high-angle optical phone recon' },
-              { img: fieldImg2, caption: 'INDUSTRIAL SHAFT RECONNAISSANCE', sub: 'Subterranean tunnel ingress with tri-sector sonar active' },
-              { img: fieldImg3, caption: 'WET SLUDGE & RUBBLE TESTING', sub: 'Traction grip test on muddy aggregate with pan-tilt head deployed' }
+              { img: fieldImg1, caption: 'ROVER SUNSET FIELD DEPLOYMENT', sub: 'Actual CyberRover X4.3 physical platform deployed with glowing RoboEyes HUD & 4WD traction' },
+              { img: fieldImg2, caption: 'SIDE CHASSIS & PHONE TURRET RUN', sub: 'High-torque geared drivetrain with Layer 1 motor driver isolation and docked smartphone mount' },
+              { img: fieldImg3, caption: 'REAR HAZMAT SENSOR MASTER DECK', sub: 'Arduino Nano Layer 2 Master acquiring MQ-4, MQ-7, MQ-135, and BMP280 multi-gas telemetry' }
             ].map((item, idx) => (
               <div
                 key={idx}

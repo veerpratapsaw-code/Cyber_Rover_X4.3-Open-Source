@@ -1,7 +1,7 @@
 import React from 'react';
 import { Smartphone, Camera, ShieldCheck, Zap } from 'lucide-react';
 import VisionHUD from '../ui/VisionHUD';
-import realRoverImg from '../../assets/real_rover_field_1.png';
+import realRoverImg from '../../assets/cyberrover_x43_full.jpg';
 
 export default function SeeSection() {
   return (

@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Compass, ShieldAlert, Eye, Activity, ChevronDown, ArrowUpRight, ShieldCheck, Zap, Radio, MapPin } from 'lucide-react';
 import { smoothScrollTo } from '../../hooks/useSmoothScroll';
-import rover3DHeroImg from '../../assets/cyberrover_x43_hero.png';
+import rover3DHeroImg from '../../assets/hero_image.png';
 
 export default function HeroSection({ telemetry }) {
   const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
@@ -168,7 +168,7 @@ export default function HeroSection({ telemetry }) {
             }}>
               <img
                 src={rover3DHeroImg}
-                alt="CYBERROVER X4.3 Real Prototype - Field Sunset (Ramgarh 2026)"
+                alt="CYBERROVER X4.3 Physical Prototype - High-Torque 4WD Autonomous Reconnaissance UGV"
                 style={{
                   width: '100%',
                   height: '100%',

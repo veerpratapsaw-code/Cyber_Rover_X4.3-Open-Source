@@ -1,7 +1,6 @@
 import React from 'react';
 import { ArrowUpRight, Code, ExternalLink, ShieldCheck, ChevronUp } from 'lucide-react';
 import { smoothScrollTo } from '../../hooks/useSmoothScroll';
-import roverHeroImg from '../../assets/rover_hero.jpg';
 
 export default function FinaleSection() {
   const scrollToTop = () => {
