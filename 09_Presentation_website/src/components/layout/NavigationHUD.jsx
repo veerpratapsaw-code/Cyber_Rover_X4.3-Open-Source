@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Wifi, BatteryMedium, Menu, X, ChevronRight, Activity, ShieldCheck } from 'lucide-react';
+import { Wifi, BatteryMedium, Menu, X, ChevronRight, Activity, ShieldCheck, Github, Radio } from 'lucide-react';
 import { smoothScrollTo } from '../../hooks/useSmoothScroll';
 
 const NAV_LINKS = [
