@@ -502,7 +502,7 @@ export default function SenseSection({ telemetry }) {
                     <span>NEO-6M GPS COORDINATES</span>
                   </div>
                   <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9375rem', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.2, margin: '2px 0 6px 0' }}>
-                    {telemetry.gpsLatitude || '23.6345'}°N, {telemetry.gpsLongitude || '85.5123'}°E
+                    {telemetry.gpsLatitude || '23.6225057'}°N, {telemetry.gpsLongitude || '85.5329254'}°E
                   </div>
                   <div style={{ fontSize: '0.6875rem', color: 'var(--status-nominal)', lineHeight: 1.4 }}>
                     {telemetry.gpsSatellites || 9} SATS // {telemetry.gpsFix || '3D DGPS LOCK'}

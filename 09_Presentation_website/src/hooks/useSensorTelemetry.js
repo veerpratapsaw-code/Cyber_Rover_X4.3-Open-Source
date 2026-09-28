@@ -10,8 +10,8 @@ export function useSensorTelemetry() {
     baroPressure: 1011.8, // hPa (BMP280)
     altitude: 348, // meters (Ramgarh, Jharkhand elevation)
     batteryVoltage: 11.95, // V (3S Li-Ion Divider)
-    gpsLatitude: 23.6345, // °N (Ramgarh District, Jharkhand)
-    gpsLongitude: 85.5123, // °E
+    gpsLatitude: 23.6225057, // °N (Ramgarh District, Jharkhand)
+    gpsLongitude: 85.5329254, // °E
     gpsAltitude: 348.5, // m
     gpsSatellites: 9,
     gpsFix: '3D DGPS LOCK',

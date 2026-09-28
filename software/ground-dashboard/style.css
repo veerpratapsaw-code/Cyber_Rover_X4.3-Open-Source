@@ -652,6 +652,40 @@ body.is-dragging-splitter {
   filter: invert(100%) hue-rotate(180deg) brightness(92%) contrast(92%);
 }
 
+/* Rover Tactical GPS Glowing Orange Dot Marker & Pulse Beacon */
+.rover-gps-dot {
+  filter: drop-shadow(0 0 8px #FF5500) drop-shadow(0 0 16px rgba(255, 85, 0, 0.85));
+  animation: roverDotPulse 2s infinite ease-in-out;
+}
+
+.rover-gps-pulse {
+  animation: roverHaloExpand 2.2s infinite ease-out;
+}
+
+@keyframes roverDotPulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 6px #FF5500) drop-shadow(0 0 12px rgba(255, 85, 0, 0.7));
+  }
+  50% {
+    filter: drop-shadow(0 0 14px #FF5500) drop-shadow(0 0 26px rgba(255, 85, 0, 1));
+  }
+}
+
+@keyframes roverHaloExpand {
+  0% {
+    stroke-opacity: 0.85;
+    fill-opacity: 0.35;
+  }
+  50% {
+    stroke-opacity: 0.25;
+    fill-opacity: 0.10;
+  }
+  100% {
+    stroke-opacity: 0.85;
+    fill-opacity: 0.35;
+  }
+}
+
 .pip-map-header {
   position: absolute;
   top: 6px;

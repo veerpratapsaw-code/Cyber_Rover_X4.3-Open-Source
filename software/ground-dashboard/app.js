@@ -1340,8 +1340,9 @@ function exportMissionCsv() {
 
 let pipMapInstance = null;
 let roverGpsMarker = null;
+let roverGpsPulse = null;
 let roverGpsTrail = null;
-let currentRoverPos = [23.793950, 86.295700]; // Last known GPS location from CSV
+let currentRoverPos = [23.6225057, 85.5329254]; // GPS Current Location (23.6225057°N, 85.5329254°E)
 
 function initPipMap() {
   const mapEl = document.getElementById('pipMap');
@@ -1365,30 +1366,50 @@ function initPipMap() {
       className: 'tactical-map-tiles'
     }).addTo(pipMapInstance);
 
-    // 3. Add Rover Position Marker (Glowing Orange Dot)
+    // 3. Add Glowing Outer Pulse Halo (Tactical Radar Ring)
+    roverGpsPulse = L.circle(currentRoverPos, {
+      radius: 40,
+      color: '#FF5500',
+      fillColor: '#FF5500',
+      fillOpacity: 0.22,
+      weight: 1.5,
+      className: 'rover-gps-pulse'
+    }).addTo(pipMapInstance);
+
+    // 4. Add Rover Position Marker (Glowing Orange Dot)
     roverGpsMarker = L.circleMarker(currentRoverPos, {
-      radius: 8,
+      radius: 8.5,
       fillColor: '#FF5500',
       color: '#FFFFFF',
       weight: 2.5,
-      fillOpacity: 1
+      fillOpacity: 1,
+      className: 'rover-gps-dot'
     }).addTo(pipMapInstance);
-    roverGpsMarker.bindPopup('<b style="color:#000;">CYBERROVER X4.3</b><br>GPS Mission Location<br>23.79395°N, 86.29570°E');
+    roverGpsMarker.bindPopup('<b style="color:#000;">CYBERROVER X4.3</b><br>GPS Mission Location<br>23.6225057°N, 85.5329254°E');
 
-    // 4. Add Breadcrumb Polyline Trail (recording rover movement only)
-    roverGpsTrail = L.polyline([], {
+    // 5. Add Breadcrumb Polyline Trail (recording rover movement only)
+    roverGpsTrail = L.polyline([currentRoverPos], {
       color: '#FF5500',
       weight: 3,
       opacity: 0.85,
       dashArray: '5, 5'
     }).addTo(pipMapInstance);
 
+    // Initial Coordinates Display
+    const coordText = document.getElementById('pipCoordText');
+    if (coordText) {
+      coordText.innerText = `ROVER: 23.62251°N, 85.53293°E`;
+    }
+
     // 6. Asynchronously Load Jharkhand Vector Boundary
     loadJharkhandVectorBoundary();
 
-    // 7. Ensure correct rendering size
+    // 7. Ensure correct rendering size and center view
     setTimeout(() => {
-      if (pipMapInstance) pipMapInstance.invalidateSize();
+      if (pipMapInstance) {
+        pipMapInstance.invalidateSize();
+        pipMapInstance.setView(currentRoverPos, 16);
+      }
     }, 400);
 
   } catch (err) {
@@ -1433,6 +1454,10 @@ function updatePipMap(lat, lon, sats, hasFix) {
 
   if (roverGpsMarker) {
     roverGpsMarker.setLatLng(currentRoverPos);
+    roverGpsMarker.setPopupContent(`<b style="color:#000;">CYBERROVER X4.3</b><br>GPS Mission Location<br>${lat.toFixed(7)}°N, ${lon.toFixed(7)}°E`);
+  }
+  if (roverGpsPulse) {
+    roverGpsPulse.setLatLng(currentRoverPos);
   }
   if (roverGpsTrail) {
     roverGpsTrail.addLatLng(currentRoverPos);
@@ -1440,7 +1465,7 @@ function updatePipMap(lat, lon, sats, hasFix) {
 
   const coordText = document.getElementById('pipCoordText');
   if (coordText) {
-    coordText.innerText = `${lat.toFixed(5)}°N, ${lon.toFixed(5)}°E (${sats || 0} SATS)`;
+    coordText.innerText = `ROVER: ${lat.toFixed(5)}°N, ${lon.toFixed(5)}°E (${sats || 0} SATS)`;
   }
 
   pipMapInstance.panTo(currentRoverPos, { animate: true, duration: 0.5 });
