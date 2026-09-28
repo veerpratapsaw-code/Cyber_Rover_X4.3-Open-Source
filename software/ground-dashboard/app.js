@@ -1340,10 +1340,8 @@ function exportMissionCsv() {
 
 let pipMapInstance = null;
 let roverGpsMarker = null;
-let baseStationMarker = null;
 let roverGpsTrail = null;
 let currentRoverPos = [23.793950, 86.295700]; // Last known GPS location from CSV
-const BASE_CAMPUS_POS = [23.787411, 86.281111]; // Saraswati Shishu Mandir / Chandrapura
 
 function initPipMap() {
   const mapEl = document.getElementById('pipMap');
