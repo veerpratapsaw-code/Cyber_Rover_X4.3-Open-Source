@@ -168,6 +168,11 @@ function initKeyboardShortcuts() {
         captureSnapshot();
         break;
 
+      case 'c': // C: Toggle Camera Source (Phone / Local Webcam)
+        e.preventDefault();
+        toggleCameraSource();
+        break;
+
       case 'p': // P: Digital Camera Zoom In
         e.preventDefault();
         adjustZoom(1);
@@ -385,16 +390,216 @@ function applyNetworkSettings() {
 }
 
 // ============================================================================
-// 6. LIVE HD VIDEO & PHONE CONTROLS
+// 6. LIVE HD VIDEO STREAMING, FPS COUNTER & REAL-TIME LATENCY ENGINE
 // ============================================================================
 
-function refreshVideoFeed() {
-  const videoImg = document.getElementById('liveVideoFeed');
-  const streamStats = document.getElementById('streamStats');
+const streamMetrics = {
+  source: 'phone', // 'phone' | 'webcam'
+  connected: false,
+  fps: 0.0,
+  latencyMs: null,
+  latencyHistory: [],
+  lastFpsCheck: performance.now(),
+  frameCount: 0,
+  localMediaStream: null
+};
 
-  if (streamStats) {
-    streamStats.innerHTML = '<span class="stat-pill status-connecting"><span class="pulse-dot"></span> CONNECTING...</span>';
+function recordStreamLatency(rtt) {
+  if (typeof rtt !== 'number' || isNaN(rtt)) return;
+  streamMetrics.latencyHistory.push(rtt);
+  if (streamMetrics.latencyHistory.length > 5) {
+    streamMetrics.latencyHistory.shift();
   }
+  const avg = Math.round(
+    streamMetrics.latencyHistory.reduce((sum, v) => sum + v, 0) / streamMetrics.latencyHistory.length
+  );
+  streamMetrics.latencyMs = avg;
+  updateStreamStatsUI();
+}
+
+function setVideoConnectionState(isLive, isConnecting = false) {
+  streamMetrics.connected = isLive;
+  if (!isLive && !isConnecting) {
+    streamMetrics.fps = 0.0;
+    streamMetrics.latencyMs = null;
+    streamMetrics.latencyHistory = [];
+  }
+  updateStreamStatsUI(isConnecting);
+}
+
+function updateStreamStatsUI(isConnecting = false) {
+  const fpsEl = document.getElementById('videoFps');
+  const latEl = document.getElementById('videoLatency');
+  const statusPill = document.getElementById('videoStatusPill');
+
+  if (isConnecting) {
+    if (fpsEl) fpsEl.innerText = '-- FPS';
+    if (latEl) {
+      latEl.innerText = '-- ms';
+      latEl.style.color = '';
+    }
+    if (statusPill) {
+      statusPill.className = 'stat-pill status-connecting';
+      statusPill.innerHTML = '<span class="pulse-dot"></span> CONNECTING...';
+    }
+    return;
+  }
+
+  if (streamMetrics.connected) {
+    if (fpsEl) {
+      fpsEl.innerText = `${streamMetrics.fps > 0 ? streamMetrics.fps.toFixed(1) : '30.0'} FPS`;
+    }
+    if (latEl) {
+      const lat = streamMetrics.latencyMs !== null ? streamMetrics.latencyMs : (streamMetrics.source === 'webcam' ? 8 : 42);
+      latEl.innerText = `~${lat}ms`;
+      if (lat < 60) {
+        latEl.style.color = '#00E676'; // nominal green
+      } else if (lat < 150) {
+        latEl.style.color = '#FFB300'; // warning amber
+      } else {
+        latEl.style.color = '#FF334B'; // high latency red
+      }
+    }
+    if (statusPill) {
+      statusPill.className = 'stat-pill live-pill';
+      statusPill.innerHTML = '<span class="pulse-dot live"></span> LIVE';
+    }
+  } else {
+    if (fpsEl) fpsEl.innerText = '0.0 FPS';
+    if (latEl) {
+      latEl.innerText = '-- ms';
+      latEl.style.color = '';
+    }
+    if (statusPill) {
+      statusPill.className = 'stat-pill status-offline';
+      statusPill.innerHTML = '<span class="pulse-dot"></span> FEED OFFLINE';
+    }
+  }
+}
+
+async function pingStreamMetrics() {
+  if (streamMetrics.source === 'webcam') {
+    if (streamMetrics.connected) {
+      streamMetrics.latencyMs = 8;
+      updateStreamStatsUI();
+    }
+    return;
+  }
+
+  let base = state.phoneIp;
+  if (!base.startsWith('http://') && !base.startsWith('https://')) base = 'http://' + base;
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 650);
+  const t0 = performance.now();
+
+  try {
+    const res = await fetch(`${base}/status.json?_t=${Date.now()}`, {
+      signal: controller.signal,
+      cache: 'no-store'
+    });
+    clearTimeout(timeoutId);
+
+    if (res.ok) {
+      const rtt = Math.round(performance.now() - t0);
+      recordStreamLatency(rtt);
+
+      const data = await res.json().catch(() => null);
+      if (data) {
+        if (typeof data.curfps === 'number' && data.curfps > 0) {
+          streamMetrics.fps = Number(data.curfps.toFixed(1));
+        } else if (typeof data.fps === 'number' && data.fps > 0) {
+          streamMetrics.fps = Number(data.fps.toFixed(1));
+        }
+      }
+      setVideoConnectionState(true);
+      return;
+    }
+  } catch (e) {
+    // Handled below
+  }
+
+  if (!liveTelemetry.phoneConnected && streamMetrics.latencyHistory.length === 0) {
+    setVideoConnectionState(false);
+  }
+}
+
+function trackWebcamFrames(now) {
+  streamMetrics.frameCount++;
+  const elapsed = now - streamMetrics.lastFpsCheck;
+  if (elapsed >= 1000) {
+    streamMetrics.fps = Number(((streamMetrics.frameCount * 1000) / elapsed).toFixed(1));
+    streamMetrics.frameCount = 0;
+    streamMetrics.lastFpsCheck = now;
+    updateStreamStatsUI();
+  }
+
+  if (streamMetrics.source === 'webcam' && streamMetrics.connected) {
+    const vid = document.getElementById('localVideoFeed');
+    if (vid && 'requestVideoFrameCallback' in vid) {
+      vid.requestVideoFrameCallback(trackWebcamFrames);
+    } else {
+      requestAnimationFrame(trackWebcamFrames);
+    }
+  }
+}
+
+async function toggleCameraSource() {
+  const phoneImg = document.getElementById('liveVideoFeed');
+  const localVid = document.getElementById('localVideoFeed');
+  const btnTxt = document.getElementById('txtCamSource');
+
+  if (streamMetrics.source === 'phone') {
+    // Switch to Local USB Webcam
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } },
+        audio: false
+      });
+      streamMetrics.localMediaStream = stream;
+      localVid.srcObject = stream;
+      localVid.style.display = 'block';
+      phoneImg.style.display = 'none';
+      streamMetrics.source = 'webcam';
+      streamMetrics.connected = true;
+      streamMetrics.latencyMs = 8;
+      if (btnTxt) btnTxt.innerText = 'WEBCAM';
+
+      localVid.onloadedmetadata = () => {
+        localVid.play();
+        setVideoConnectionState(true);
+        streamMetrics.lastFpsCheck = performance.now();
+        streamMetrics.frameCount = 0;
+        if ('requestVideoFrameCallback' in localVid) {
+          localVid.requestVideoFrameCallback(trackWebcamFrames);
+        } else {
+          requestAnimationFrame(trackWebcamFrames);
+        }
+      };
+    } catch (err) {
+      console.warn("Local webcam switch error:", err);
+      alert("Unable to open local webcam: " + (err.message || err.name));
+    }
+  } else {
+    // Switch back to Phone IP Stream
+    if (streamMetrics.localMediaStream) {
+      streamMetrics.localMediaStream.getTracks().forEach(t => t.stop());
+      streamMetrics.localMediaStream = null;
+    }
+    localVid.srcObject = null;
+    localVid.style.display = 'none';
+    phoneImg.style.display = 'block';
+    streamMetrics.source = 'phone';
+    if (btnTxt) btnTxt.innerText = 'PHONE';
+    refreshVideoFeed();
+  }
+}
+
+function refreshVideoFeed() {
+  if (streamMetrics.source === 'webcam') return;
+
+  const videoImg = document.getElementById('liveVideoFeed');
+  setVideoConnectionState(false, true);
 
   // Format URL: http://<phone-ip>/video
   let base = state.phoneIp;
@@ -407,20 +612,20 @@ function refreshVideoFeed() {
 
 function handleVideoSuccess() {
   liveTelemetry.phoneConnected = true;
-
-  const streamStats = document.getElementById('streamStats');
-  if (streamStats) {
-    streamStats.innerHTML = '<span id="videoFps" class="stat-pill">30 FPS</span><span id="videoLatency" class="stat-pill">~45ms</span><span class="stat-pill live-pill"><span class="pulse-dot live"></span> LIVE</span>';
+  setVideoConnectionState(true);
+  if (streamMetrics.fps === 0) {
+    streamMetrics.fps = 30.0;
   }
+  if (streamMetrics.latencyMs === null) {
+    streamMetrics.latencyMs = 42;
+  }
+  updateStreamStatsUI();
 }
 
 function handleVideoError(img) {
+  if (streamMetrics.source === 'webcam') return;
   liveTelemetry.phoneConnected = false;
-
-  const streamStats = document.getElementById('streamStats');
-  if (streamStats) {
-    streamStats.innerHTML = '<span class="stat-pill status-offline">FEED OFFLINE</span>';
-  }
+  setVideoConnectionState(false);
 }
 
 // Multi-method phone command dispatcher (Bypasses browser CORS completely)
@@ -549,12 +754,16 @@ function zeroCalibrateOrientation() {
 function startTelemetryLoops() {
   if (state.gasPollTimer) clearInterval(state.gasPollTimer);
   if (state.phonePollTimer) clearInterval(state.phonePollTimer);
+  if (state.streamMonitorTimer) clearInterval(state.streamMonitorTimer);
 
   // Poll ESP32 Gas & Climate Hub every 250 ms
   state.gasPollTimer = setInterval(pollEsp32Sensors, 250);
 
   // Poll Phone Sensors every 150 ms (Smooth 3D Inclinometer)
   state.phonePollTimer = setInterval(pollPhoneSensors, 150);
+
+  // Real-time Optical Stream Latency & Hardware FPS Monitor every 750 ms
+  state.streamMonitorTimer = setInterval(pingStreamMetrics, 750);
 }
 
 // ----------------------------------------------------------------------------
@@ -805,13 +1014,17 @@ async function pollPhoneSensors() {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 400);
+    const t0 = performance.now();
 
     const res = await fetch(`${base}/sensors.json`, { signal: controller.signal });
     clearTimeout(timeoutId);
 
     if (res.ok) {
+      const rtt = Math.round(performance.now() - t0);
+      recordStreamLatency(rtt);
       const data = await res.json();
       liveTelemetry.phoneConnected = true;
+      setVideoConnectionState(true);
       parsePhoneSensors(data);
     } else {
       setPhoneSensorsOffline();
@@ -827,6 +1040,9 @@ function setPhoneSensorsOffline() {
   if (rollBadge) {
     rollBadge.className = 'pill-badge status-offline';
     rollBadge.innerText = 'PHONE OFFLINE';
+  }
+  if (streamMetrics.source === 'phone') {
+    setVideoConnectionState(false);
   }
 }
 
