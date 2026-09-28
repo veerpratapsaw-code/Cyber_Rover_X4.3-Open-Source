@@ -21,3 +21,17 @@ __pycache__/
 # Map raster tiles cache
 software/ground-dashboard/tiles/
 
+# Node / Web dependencies & builds
+node_modules/
+dist/
+dist-ssr/
+.vite/
+*.log
+
+# Large media files exceeding GitHub 100MB limit
+*.mp4
+*.mkv
+*.avi
+*.mov
+*.zip
+*.tar.gz
