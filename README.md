@@ -11,11 +11,13 @@
     <a href="LICENSE.md"><img src="https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge" alt="License MIT"></a>
     <a href="hardware/MECHANICAL_INTEGRATION.md"><img src="https://img.shields.io/badge/Architecture-Dual--Tier%20Segregated-blue.svg?style=for-the-badge" alt="Dual-Tier Architecture"></a>
     <a href="firmware/layer2-environmental-node-nano/"><img src="https://img.shields.io/badge/Telemetry-LoRa%20RYLR998%20(868%2F915MHz)-orange.svg?style=for-the-badge" alt="LoRa Telemetry"></a>
+    <a href="BOM.md"><img src="https://img.shields.io/badge/BOM-₹20k%20Total%20Build-brightgreen.svg?style=for-the-badge" alt="BOM ~20k INR"></a>
     <a href="software/ground-dashboard/"><img src="https://img.shields.io/badge/Ground%20Cockpit-SQLite%20DBMS%20%2B%20Web%20HUD-red.svg?style=for-the-badge" alt="Ground Dashboard"></a>
   </p>
 
   <p align="center">
     <a href="#-executive-summary">Overview</a> •
+    <a href="BOM.md">Bill of Materials (₹20k)</a> •
     <a href="#-visual-showcase--hardware-gallery">Gallery</a> •
     <a href="#-key-architectural-innovations">Innovations</a> •
     <a href="#-system-topography">Architecture</a> •
@@ -291,6 +293,7 @@ start_ground_station.bat
 ```
 cyberrover x4.3/
 ├── README.md                            # Comprehensive project overview & technical manual
+├── BOM.md                               # Itemized component list & ~₹20k INR Bill of Materials
 ├── CHANGELOG_X4.2_TO_X4.3.md            # Detailed generation comparison & upgrade analysis
 ├── EXHIBITION_PROJECT_REPORT.md         # Official State Exhibition synopsis & scientific paper
 ├── EXHIBITION_SPEECH_SCRIPT_HINGLISH.md # Live demonstration pitch & judge Q&A guide
